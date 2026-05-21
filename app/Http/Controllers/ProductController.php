@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\Product\StoreProductRequest;
 use App\Models\Product;
+use Illuminate\Http\Request;
+use App\Http\Resources\ProductResource;
 
 class ProductController extends Controller
 {
@@ -29,5 +31,43 @@ class ProductController extends Controller
                 'created_at' => $product->created_at->toIso8601String(),
             ]
         ], 201);
+    }
+
+    public function index(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'page'       => 'integer|min:1',
+            'limit'      => 'integer|min:1|max:100',
+            'search'     => 'nullable|string',
+            'sort_by'    => 'nullable|in:name,price,created_at',
+            'sort_order' => 'nullable|in:asc,desc',
+        ]);
+
+        $limit     = $request->input('limit', 10);
+        $search    = $request->input('search');
+        $sortBy    = $request->input('sort_by', 'created_at');
+        $sortOrder = $request->input('sort_order', $sortBy === 'created_at' ? 'desc' : 'asc');
+
+        $query = Product::query();
+
+        $query->when($search, function ($q, $search) {
+            $q->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%']);
+        });
+
+        $products = $query->orderBy($sortBy, $sortOrder)
+            ->orderBy('id', 'desc')
+            ->paginate($limit);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Daftar produk berhasil diambil',
+            'data'    => \App\Http\Resources\ProductResource::collection($products->items()),
+            'pagination' => [
+                'total'        => $products->total(),
+                'per_page'     => $products->perPage(),
+                'current_page' => $products->currentPage(),
+                'total_pages'  => $products->lastPage(),
+            ]
+        ], 200);
     }
 }
