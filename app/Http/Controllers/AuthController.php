@@ -53,18 +53,5 @@ class AuthController extends Controller
                 'token' => $token
             ]
         ], 200);
-
-        $user->tokens()->delete();
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'success' => true,
-            'message' => 'login berhasil',
-            'data' => [
-                'user' => Auth::user(),
-                'token' => $token
-            ]
-        ]);
     }
 }
