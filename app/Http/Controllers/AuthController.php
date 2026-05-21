@@ -6,6 +6,8 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\JsonResponse;
+use App\Http\Requests\Auth\LoginRequest;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -30,5 +32,39 @@ class AuthController extends Controller
                 'token' => $token
             ]
         ], 201);
+    }
+
+    public function login(LoginRequest $request): JsonResponse
+    {
+        $credentials = $request->only('email', 'password');
+
+        if (! $token = Auth::attempt($credentials)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'invalid token',
+                'data' => null,
+            ], 401);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'login berhasil',
+            'data' => [
+                'token' => $token
+            ]
+        ], 200);
+
+        $user->tokens()->delete();
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'login berhasil',
+            'data' => [
+                'user' => Auth::user(),
+                'token' => $token
+            ]
+        ]);
     }
 }
