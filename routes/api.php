@@ -6,7 +6,8 @@ use App\Http\Controllers\ProductController;
 
 Route::prefix('v1/auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
+    Route::post('/login', [AuthController::class, 'login'])
+        ->middleware('throttle:login');
 });
 
 Route::middleware('auth:api')->group(function () {
