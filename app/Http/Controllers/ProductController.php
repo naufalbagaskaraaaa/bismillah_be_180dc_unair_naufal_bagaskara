@@ -7,7 +7,9 @@ use App\Http\Requests\Product\StoreProductRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Resources\ProductResource;
-
+use App\Http\Requests\Product\UpdateProductRequest;
+use Hamcrest\Text\StringContains;
+use Illuminate\Support\Facades\Validator;
 class ProductController extends Controller
 {
     public function store(StoreProductRequest $request): JsonResponse
@@ -43,7 +45,7 @@ class ProductController extends Controller
             'sort_order' => 'nullable|in:asc,desc',
         ]);
 
-        $limit     = $request->input('limit', 15);
+        $limit     = $request->input('limit', 10);
         $search    = $request->input('search');
         $sortBy    = $request->input('sort_by', 'created_at');
         $sortOrder = $request->input('sort_order', $sortBy === 'created_at' ? 'desc' : 'asc');
@@ -61,7 +63,7 @@ class ProductController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Daftar produk berhasil diambil',
-            'data'    => \App\Http\Resources\ProductResource::collection($products->items()),
+            'data'    => ProductResource::collection($products->items()),
             'pagination' => [
                 'total'        => $products->total(),
                 'per_page'     => $products->perPage(),
@@ -73,7 +75,7 @@ class ProductController extends Controller
 
     public function show($id): JsonResponse
     {
-        $validator = \Illuminate\Support\Facades\Validator::make(['id' => $id], [
+        $validator = Validator::make(['id' => $id], [
             'id' => 'required|uuid'
         ]);
 
@@ -97,7 +99,47 @@ class ProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => new \App\Http\Resources\ProductResource($product)
+            'data'    => new ProductResource($product)
+        ], 200);
+    }
+
+    public function update(UpdateProductRequest $request, string $id): JsonResponse
+    {
+        $validator = Validator::make(['id' => $id], [
+            'id' => 'required|uuid'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Format ID tidak valid',
+                'errors'  => $validator->errors()
+            ], 422);
+        }
+
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found',
+                'data'    => null
+            ], 404);
+        }
+
+        if ($product->owner_id !== auth('api')->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk mengubah produk ini'
+            ], 403);
+        }
+
+        $product->update($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product updated successfully',
+            'data'    => clone new ProductResource($product)
         ], 200);
     }
 }
