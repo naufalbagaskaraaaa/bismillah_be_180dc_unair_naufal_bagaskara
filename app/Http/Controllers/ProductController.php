@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\ProductResource;
 use App\Http\Requests\Product\UpdateProductRequest;
 use Illuminate\Support\Facades\Validator;
+
 class ProductController extends Controller
 {
     public function store(StoreProductRequest $request): JsonResponse
@@ -45,7 +46,7 @@ class ProductController extends Controller
                 'errors'  => $validator->errors()
             ], 422);
         }
-        
+
         $limit     = $request->input('limit', 10);
         $search    = $request->input('search');
         $sortBy    = $request->input('sort_by', 'created_at');
@@ -105,41 +106,43 @@ class ProductController extends Controller
 
     public function update(UpdateProductRequest $request, string $id): JsonResponse
     {
-        $validator = Validator::make(['id' => $id], [
-            'id' => 'required|uuid'
-        ]);
+        $validator = Validator::make(
+            ['id' => $id],
+            ['id' => ['required', 'uuid']],
+            ['id.uuid' => 'The id must be a valid UUID.']
+        );
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Format ID tidak valid',
-                'errors'  => $validator->errors()
+                'message' => $validator->errors()->first('id'),
+                'errors'  => $validator->errors(),
             ], 422);
         }
 
-        $product = Product::find($id);
+        $product = Product::query()->where('id', $id)->first();
 
         if (!$product) {
             return response()->json([
                 'success' => false,
                 'message' => 'Product not found',
-                'data'    => null
             ], 404);
         }
 
-        if ($product->owner_id !== auth('api')->id()) {
+        if ((string) $product->owner_id !== (string) auth('api')->id()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda tidak memiliki akses untuk mengubah produk ini'
+                'message' => 'Forbidden: You can only update your own products',
             ], 403);
         }
 
-        $product->update($request->validated());
+        $product->fill($request->validated());
+        $product->save();
 
         return response()->json([
             'success' => true,
             'message' => 'Product updated successfully',
-            'data'    => clone new ProductResource($product)
+            'data'    => new ProductResource($product)
         ], 200);
     }
 

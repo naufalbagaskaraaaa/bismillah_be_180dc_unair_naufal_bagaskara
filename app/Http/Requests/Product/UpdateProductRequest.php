@@ -4,6 +4,8 @@ namespace App\Http\Requests\Product;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateProductRequest extends FormRequest
 {
@@ -23,8 +25,17 @@ class UpdateProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'  => 'nullable|string',
-            'price' => 'nullable|numeric|gt:0',
+            'name'  => ['sometimes', 'string', 'min:1'],
+            'price' => ['sometimes', 'numeric', 'gt:0'],
         ];
+    }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        throw new HttpResponseException(response()->json([
+            'success' => false,
+            'message' => $validator->errors()->first(),
+            'errors'  => $validator->errors(),
+        ], 422));
     }
 }
