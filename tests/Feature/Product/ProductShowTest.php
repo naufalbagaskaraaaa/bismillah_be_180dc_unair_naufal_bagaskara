@@ -48,7 +48,7 @@ class ProductShowTest extends TestCase
         $response->assertStatus(404)
             ->assertJson([
                 'success' => false,
-                'message' => 'Product not found'
+                'message' => 'Product not found',
             ]);
     }
 
@@ -58,7 +58,7 @@ class ProductShowTest extends TestCase
 
         $product = Product::factory()->create([
             'owner_id' => $user->id,
-            'name' => 'Produk Khusus',
+            'name' => 'nanas',
             'price' => 150000
         ]);
 
@@ -76,7 +76,40 @@ class ProductShowTest extends TestCase
                     'updated_at',
                 ]
             ])
-            ->assertJsonPath('data.name', 'Produk Khusus')
+            ->assertJsonPath('data.name', 'nanas')
             ->assertJsonPath('data.price', 150000);
+    }
+
+    public function test_show_fails_with_expired_token()
+    {
+        $user = User::factory()->create();
+        $product = Product::factory()->create(['owner_id' => $user->id]);
+
+        $payload = [ // disini generate token yang expired
+            'sub' => $user->id,
+            'iat' => now()->subHours(2)->timestamp,
+            'exp' => now()->subHours(1)->timestamp, // expired 1 jam sebelumnya
+        ];
+
+        $expiredToken = JWTAuth::claims($payload)->fromUser($user);
+
+        $response = $this->withToken($expiredToken)
+            ->getJson("/api/v1/products/{$product->id}");
+
+        $response->assertStatus(401)
+            ->assertJson([
+                'message' => 'Token has expired'
+            ]);
+    }
+
+    public function test_show_fails_with_malformed_token()
+    {
+        $user = User::factory()->create();
+        $product = Product::factory()->create(['owner_id' => $user->id]);
+
+        $response = $this->withToken('invalid.jwt.token')
+            ->getJson("/api/v1/products/{$product->id}");
+
+        $response->assertStatus(401);
     }
 }

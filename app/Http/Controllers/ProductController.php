@@ -23,7 +23,7 @@ class ProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'product created successfully', // tesk respon yang sama di contoh case saya sesuaikan disini
+            'message' => 'Product created successfully', // tesk respon yang sama di contoh case saya sesuaikan disini
             'data'    => new ProductResource($product)
         ], 201);
     }
@@ -94,7 +94,6 @@ class ProductController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Product not found',
-                'data'    => null
             ], 404);
         }
 
@@ -123,7 +122,7 @@ class ProductController extends Controller
         if (!$product) {
             return response()->json([
                 'success' => false,
-                'message' => 'Product tidak ditemukan',
+                'message' => 'Product not found',
                 'data'    => null
             ], 404);
         }
@@ -139,7 +138,7 @@ class ProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'product updated successfully',
+            'message' => 'Product updated successfully',
             'data'    => clone new ProductResource($product)
         ], 200);
     }
@@ -163,7 +162,7 @@ class ProductController extends Controller
         if (!$product) {
             return response()->json([
                 'success' => false,
-                'message' => 'Product tidak ditemukan',
+                'message' => 'Product not found',
                 'data'    => null
             ], 404);
         }
@@ -179,7 +178,7 @@ class ProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'product deleted successfully'
+            'message' => 'Product deleted successfully'
         ], 200);
     }
 }
