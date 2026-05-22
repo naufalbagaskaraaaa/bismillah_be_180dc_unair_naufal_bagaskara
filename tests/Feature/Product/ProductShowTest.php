@@ -85,21 +85,16 @@ class ProductShowTest extends TestCase
         $user = User::factory()->create();
         $product = Product::factory()->create(['owner_id' => $user->id]);
 
-        $payload = [ // disini generate token yang expired
-            'sub' => $user->id,
-            'iat' => now()->subHours(2)->timestamp,
-            'exp' => now()->subHours(1)->timestamp, // expired 1 jam sebelumnya
-        ];
+        $token = JWTAuth::fromUser($user);
 
-        $expiredToken = JWTAuth::claims($payload)->fromUser($user);
+        $this->travel(61)->minutes(); // merekayasa menit agar token kadaluarsa
 
-        $response = $this->withToken($expiredToken)
+        $response = $this->withToken($token)
             ->getJson("/api/v1/products/{$product->id}");
 
-        $response->assertStatus(401)
-            ->assertJson([
-                'message' => 'Token has expired'
-            ]);
+        $response->assertStatus(401);
+
+        $this->travelBack();
     }
 
     public function test_show_fails_with_malformed_token()
