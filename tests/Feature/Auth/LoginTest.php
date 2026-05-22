@@ -94,7 +94,7 @@ class LoginTest extends TestCase
 
         $this->travel(61)->minutes(); // memajukan waktu 61 menit agar token expired default TTL di lebih dari 60 menit
 
-        $response = $this->withToken($token)->getJson('/api/v1/products'); // akses api mennggunakan api yang kadaluarsa 
+        $response = $this->withToken($token)->getJson('/api/protected-endpoint'); // akses api mennggunakan api yang kadaluarsa 
 
         $response->assertStatus(401);
     }

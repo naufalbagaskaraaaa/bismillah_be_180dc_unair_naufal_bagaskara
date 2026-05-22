@@ -23,14 +23,14 @@ class ProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'product created successfully', // kalimatnya saya sesuaikan permintaan case
+            'message' => 'product created successfully', // tesk respon yang sama di contoh case saya sesuaikan disini
             'data'    => new ProductResource($product)
         ], 201);
     }
 
     public function index(Request $request): JsonResponse
     {
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'page'       => 'integer|min:1',
             'limit'      => 'integer|min:1|max:100',
             'search'     => 'nullable|string',
@@ -38,6 +38,14 @@ class ProductController extends Controller
             'sort_order' => 'nullable|in:asc,desc',
         ]);
 
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error',
+                'errors'  => $validator->errors()
+            ], 422);
+        }
+        
         $limit     = $request->input('limit', 10);
         $search    = $request->input('search');
         $sortBy    = $request->input('sort_by', 'created_at');
