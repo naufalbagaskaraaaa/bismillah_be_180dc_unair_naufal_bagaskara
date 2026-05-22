@@ -83,4 +83,39 @@ class RegisterTest extends TestCase
 
         $response->assertStatus(422)->assertJsonValidationErrors(['password']);
     }
+
+    public function test_register_creates_user_and_returns_token()
+    {
+        $response = $this->postJson('/api/v1/auth/register', [
+            'email' => 'test@example.com',
+            'password' => '123456781234',
+            'password_confirmation' => '123456781234',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'data' => [
+                    'user' => ['id', 'email', 'created_at', 'updated_at'],
+                    'token'
+                ]
+            ]);
+
+        $response->assertJsonMissingPath('data.user.password');
+    }
+
+    public function test_register_rejects_duplicate_email()
+    {
+        User::factory()->create(['email' => 'duplikat@example.com']);
+
+        $response = $this->postJson('/api/v1/auth/register', [
+            'email' => 'duplikat@example.com',
+            'password' => '123456781234',
+            'password_confirmation' => '123456781234'
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['email']);
+    }
 }

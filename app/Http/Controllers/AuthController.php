@@ -28,7 +28,8 @@ class AuthController extends Controller
                 'user'  => [
                     'id'    => $user->id,
                     'email' => $user->email,
-                    'created_at' => $user->created_at
+                    'created_at' => $user->created_at->toIso8601String(),
+                    'updated_at' => $user->updated_at->toIso8601String(),
                 ],
                 'token' => $token
             ]

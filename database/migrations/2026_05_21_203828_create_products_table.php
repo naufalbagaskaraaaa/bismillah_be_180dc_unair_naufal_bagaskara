@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->decimal('price', 15, 2);
             $table->foreignUuid('owner_id')
-            ->constrained('users')
-            ->cascadeOnDelete();
+                ->constrained('users')
+                ->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();
         });

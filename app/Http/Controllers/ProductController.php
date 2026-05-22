@@ -142,4 +142,43 @@ class ProductController extends Controller
             'data'    => clone new ProductResource($product)
         ], 200);
     }
+
+    public function destroy(string $id): JsonResponse
+    {
+        $validator = Validator::make(['id' => $id], [
+            'id' => 'required|uuid'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Format ID tidak valid',
+                'errors'  => $validator->errors()
+            ], 422);
+        }
+
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found',
+                'data'    => null
+            ], 404);
+        }
+
+        if ($product->owner_id !== auth('api')->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk menghapus produk ini'
+            ], 403);
+        }
+
+        $product->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product deleted successfully'
+        ], 200);
+    }
 }

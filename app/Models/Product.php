@@ -19,6 +19,8 @@ class Product extends Model
         'owner_id',
     ];
 
+    protected $dates = ['deleted_at'];
+
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
