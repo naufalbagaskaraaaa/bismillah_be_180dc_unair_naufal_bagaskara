@@ -84,7 +84,7 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Format ID tidak valid',
+                'message' => 'The id must be a valid UUID',
                 'errors'  => $validator->errors()
             ], 422);
         }
@@ -148,32 +148,33 @@ class ProductController extends Controller
 
     public function destroy(string $id): JsonResponse
     {
-        $validator = Validator::make(['id' => $id], [
-            'id' => 'required|uuid'
-        ]);
+        $validator = Validator::make(
+            ['id' => $id],
+            ['id' => ['required', 'uuid']],
+            ['id.uuid' => 'The id must be a valid UUID.']
+        );
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Format ID tidak valid',
+                'message' => $validator->errors()->first('id'),
                 'errors'  => $validator->errors()
             ], 422);
         }
 
-        $product = Product::find($id);
+        $product = Product::query()->where('id', $id)->first();
 
         if (!$product) {
             return response()->json([
                 'success' => false,
                 'message' => 'Product not found',
-                'data'    => null
             ], 404);
         }
 
-        if ($product->owner_id !== auth('api')->id()) {
+        if ((string) $product->owner_id !== (string) auth('api')->id()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda tidak memiliki akses untuk menghapus produk ini'
+                'message' => 'Forbidden: You can only delete your own products',
             ], 403);
         }
 
