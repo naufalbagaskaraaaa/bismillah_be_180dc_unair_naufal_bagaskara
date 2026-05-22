@@ -8,7 +8,6 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Resources\ProductResource;
 use App\Http\Requests\Product\UpdateProductRequest;
-use Hamcrest\Text\StringContains;
 use Illuminate\Support\Facades\Validator;
 class ProductController extends Controller
 {
@@ -24,14 +23,8 @@ class ProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'produk berhasil dibuat',
-            'data'    => [
-                'id'         => $product->id,
-                'name'       => $product->name,
-                'price'      => (float) $product->price,
-                'owner_id'   => $product->owner_id,
-                'created_at' => $product->created_at->toIso8601String(),
-            ]
+            'message' => 'product created successfully', // kalimatnya saya sesuaikan permintaan case
+            'data'    => new ProductResource($product)
         ], 201);
     }
 
@@ -62,7 +55,7 @@ class ProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Daftar produk berhasil diambil',
+            'message' => 'Product list retrieved successfully',
             'data'    => ProductResource::collection($products->items()),
             'pagination' => [
                 'total'        => $products->total(),
@@ -122,7 +115,7 @@ class ProductController extends Controller
         if (!$product) {
             return response()->json([
                 'success' => false,
-                'message' => 'Product not found',
+                'message' => 'Product tidak ditemukan',
                 'data'    => null
             ], 404);
         }
@@ -138,7 +131,7 @@ class ProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Product updated successfully',
+            'message' => 'product updated successfully',
             'data'    => clone new ProductResource($product)
         ], 200);
     }
@@ -162,7 +155,7 @@ class ProductController extends Controller
         if (!$product) {
             return response()->json([
                 'success' => false,
-                'message' => 'Product not found',
+                'message' => 'Product tidak ditemukan',
                 'data'    => null
             ], 404);
         }
@@ -178,7 +171,7 @@ class ProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Product deleted successfully'
+            'message' => 'product deleted successfully'
         ], 200);
     }
 }

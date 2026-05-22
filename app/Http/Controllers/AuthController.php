@@ -44,7 +44,6 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'invalid token',
-                'data' => null,
             ], 401);
         }
 
@@ -52,7 +51,9 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'login berhasil',
             'data' => [
-                'token' => $token
+                'token' => $token,
+                'token_type' => 'bearer',
+                'expires_in' => JWTAuth::factory()->getTTL() * 60, // dalam satuan detik
             ]
         ], 200);
     }

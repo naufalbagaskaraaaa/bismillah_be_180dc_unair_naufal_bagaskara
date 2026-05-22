@@ -81,4 +81,19 @@ class ProductCreateTest extends TestCase
 
         $response->assertStatus(422)->assertJsonValidationErrors(['name']);
     }
+
+    public function test_create_product_rejects_expired_token()
+    {
+        $user = User::factory()->create();
+        $token = JWTAuth::fromUser($user);
+
+        $this->travel(61)->minutes(); // Lompat ke masa depan 61 menit agar token kadaluarsa
+
+        $response = $this->withToken($token)->postJson('/api/v1/products', [
+            'name' => 'Produk Masa Depan',
+            'price' => 50000
+        ]);
+
+        $response->assertStatus(401);
+    }
 }

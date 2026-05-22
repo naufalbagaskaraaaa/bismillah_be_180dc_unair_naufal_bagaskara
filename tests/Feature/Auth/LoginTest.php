@@ -64,4 +64,38 @@ class LoginTest extends TestCase
         $this->assertArrayHasKey('exp', $payload->toArray()); // exp = expired at
         $this->assertEquals($user->id, $payload->get('sub'));
     }
+
+    public function test_login_rejects_unregistered_email()
+    {
+        $response = $this->postJson('/api/v1/auth/login', [
+            'email' => 'tuyul@example.com',
+            'password' => '123456781234'
+        ]);
+
+        $response->assertStatus(401)
+            ->assertJsonPath('message', 'invalid token');
+    }
+
+    public function test_login_validates_required_fields()
+    {
+        $response = $this->postJson('/api/v1/auth/login', [
+            'email' => 'sembarang@example.com'
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['password']);
+    }
+
+    public function test_expired_token_is_rejected_on_protected_endpoint()
+    {
+        $user = User::factory()->create();
+
+        $token = JWTAuth::fromUser($user);
+
+        $this->travel(61)->minutes(); // memajukan waktu 61 menit agar token expired default TTL di lebih dari 60 menit
+
+        $response = $this->withToken($token)->getJson('/api/v1/products'); // akses api mennggunakan api yang kadaluarsa 
+
+        $response->assertStatus(401);
+    }
 }

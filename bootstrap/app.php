@@ -15,5 +15,24 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Throwable $e, \Illuminate\Http\Request $request) {
+            if ($e instanceof \PHPOpenSourceSaver\JWTAuth\Exceptions\TokenExpiredException) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Token has expired'
+                ], 401);
+            }
+            if ($e instanceof \PHPOpenSourceSaver\JWTAuth\Exceptions\TokenInvalidException) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Token is invalid'
+                ], 401);
+            }
+            if ($e instanceof \PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Token is absent'
+                ], 401);
+            }
+        });
     })->create();
