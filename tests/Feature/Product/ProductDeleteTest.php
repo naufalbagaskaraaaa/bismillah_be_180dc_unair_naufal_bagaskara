@@ -129,4 +129,28 @@ class ProductDeleteTest extends TestCase
         $this->deleteJson("/api/v1/products/{$product->id}")
             ->assertStatus(401);
     }
+
+    public function test_soft_deleted_product_does_not_appear_in_index()
+    {
+        $user = User::factory()->create();
+        $token = JWTAuth::fromUser($user);
+
+        $product1 = Product::factory()->create(['owner_id' => $user->id]);
+        $product2 = Product::factory()->create(['owner_id' => $user->id]);
+
+        $this->withToken($token)
+            ->deleteJson("/api/v1/products/{$product1->id}")
+            ->assertStatus(200);
+
+        $response = $this->withToken($token)
+            ->getJson('/api/v1/products');
+
+        $response->assertStatus(200);
+
+        $responseData = $response->json('data');
+        $productIds = collect($responseData)->pluck('id')->toArray();
+
+        $this->assertNotContains($product1->id, $productIds);
+        $this->assertContains($product2->id, $productIds);
+    }
 }
