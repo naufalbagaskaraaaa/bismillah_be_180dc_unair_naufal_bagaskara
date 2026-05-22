@@ -20,6 +20,7 @@ class ProductResource extends JsonResource
             'price'      => (float) $this->price,
             'owner_id'   => $this->owner_id,
             'created_at' => $this->created_at->toIso8601String(),
+            'updated_at' => $this->updated_at->toIso8601String(),
         ];
     }
 }

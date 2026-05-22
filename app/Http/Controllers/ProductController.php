@@ -43,7 +43,7 @@ class ProductController extends Controller
             'sort_order' => 'nullable|in:asc,desc',
         ]);
 
-        $limit     = $request->input('limit', 10);
+        $limit     = $request->input('limit', 15);
         $search    = $request->input('search');
         $sortBy    = $request->input('sort_by', 'created_at');
         $sortOrder = $request->input('sort_order', $sortBy === 'created_at' ? 'desc' : 'asc');
@@ -68,6 +68,36 @@ class ProductController extends Controller
                 'current_page' => $products->currentPage(),
                 'total_pages'  => $products->lastPage(),
             ]
+        ], 200);
+    }
+
+    public function show($id): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make(['id' => $id], [
+            'id' => 'required|uuid'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Format ID tidak valid',
+                'errors'  => $validator->errors()
+            ], 422);
+        }
+
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found',
+                'data'    => null
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data'    => new \App\Http\Resources\ProductResource($product)
         ], 200);
     }
 }

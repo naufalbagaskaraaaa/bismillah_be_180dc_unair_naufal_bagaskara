@@ -4,9 +4,8 @@ namespace Database\Factories;
 
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<Product>
+  /**
+ *t  @extends Factory<Product>
  */
 class ProductFactory extends Factory
 {
@@ -20,7 +19,6 @@ class ProductFactory extends Factory
         return [
             'name' => fake()->words(3, true),
             'price' => fake()->randomFloat(2, 1000, 100000),
-            // owner_id will be overwritten in the test usually
         ];
     }
 }
