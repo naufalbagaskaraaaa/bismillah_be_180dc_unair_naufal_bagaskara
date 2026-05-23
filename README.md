@@ -1,6 +1,6 @@
 ﻿<div align="center">
-  <h1>🚀 180DC UNAIR Backend Test Case</h1>
-  <p><strong>REST API untuk seleksi IT Analyst</strong> - Laravel 13 · JWT · PostgreSQL</p>
+  <h1>180DC UNAIR Backend Test Case</h1>
+  <p><strong>REST API untuk manajemen produk</strong> - Laravel 13 · JWT · PostgreSQL</p>
   
   ![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?logo=laravel&logoColor=white)
   ![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?logo=php&logoColor=white)
