@@ -1,0 +1,36 @@
+$kind: http-request
+name: Create Product
+method: POST
+url: '{{baseUrl}}/api/v1/products'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: 'Bearer {{token}}'
+body:
+  type: json
+  content: |-
+    {
+      "name": "Sample Product",
+      "price": 99.99
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // Auto-save product ID to environment variable
+      const response = pm.response.json();
+      
+      if (response.id) {
+          pm.environment.set("productId", response.id);
+          console.log("Product ID saved:", response.id);
+      } else if (response.data && response.data.id) {
+          pm.environment.set("productId", response.data.id);
+          console.log("Product ID saved:", response.data.id);
+      }
+      
+      // Test response
+      pm.test("Status code is 201 or 200", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200, 201]);
+      });

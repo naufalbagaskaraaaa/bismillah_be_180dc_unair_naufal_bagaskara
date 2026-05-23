@@ -1,0 +1,3 @@
+$kind: collection
+name: Products
+description: Product management endpoints - CRUD operations

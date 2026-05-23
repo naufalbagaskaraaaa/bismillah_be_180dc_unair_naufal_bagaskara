@@ -23,7 +23,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'registasi berhasil',
+            'message' => 'Registrasi berhasil',
             'data'    => [
                 'user'  => [
                     'id'    => $user->id,
@@ -43,13 +43,13 @@ class AuthController extends Controller
         if (! $token = JWTAuth::attempt($credentials)) {
             return response()->json([
                 'success' => false,
-                'message' => 'invalid token',
+                'message' => 'Invalid credentials',
             ], 401);
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'login berhasil',
+            'message' => 'Login berhasil',
             'data' => [
                 'token' => $token,
                 'token_type' => 'bearer',

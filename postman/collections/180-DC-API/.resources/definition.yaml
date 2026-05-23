@@ -1,0 +1,7 @@
+$kind: collection
+name: 180 DC API
+description: API Collection untuk 180 DC - Auth, Products, dan System endpoints
+variables:
+  - key: baseUrl
+    value: 'http://localhost:8000'
+    description: Base URL untuk API

@@ -1,0 +1,21 @@
+$kind: http-request
+name: Get Products List
+method: GET
+url: '{{baseUrl}}/api/v1/products'
+order: 4000
+queryParams:
+  - key: page
+    value: '1'
+    description: Page number
+  - key: limit
+    value: '10'
+    description: Items per page
+  - key: search
+    value: ''
+    description: Search keyword
+  - key: sort_by
+    value: created_at
+    description: Sort by field
+  - key: sort_order
+    value: desc
+    description: 'Sort order (asc/desc)'
